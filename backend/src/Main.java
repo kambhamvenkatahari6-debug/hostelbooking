@@ -34,7 +34,8 @@ public class Main {
     private static final EventBus EVENTS = new EventBus();
 
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", 8080), 0);
+        int port = parseInt(System.getenv("PORT"), 8080);
+        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
         server.createContext("/api/signup", new SignupHandler());
         server.createContext("/api/login", new LoginHandler());
@@ -60,7 +61,7 @@ public class Main {
 
         server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
         server.start();
-        System.out.println("Backend running at http://localhost:8080");
+        System.out.println("Backend running at http://localhost:" + port);
         System.out.println("Serving frontend from " + frontendRoot.toAbsolutePath());
     }
 

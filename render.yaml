@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: hostelbooking
+    env: java
+    plan: free
+    buildCommand: mkdir -p backend/out && javac -d backend/out backend/src/Main.java
+    startCommand: java -cp backend/out Main
+    healthCheckPath: /login.html
+    autoDeploy: true
