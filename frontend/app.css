@@ -34,7 +34,9 @@ body { margin: 0; font-family: "DM Sans", "Segoe UI", sans-serif; }
     radial-gradient(circle at bottom right, rgba(31, 78, 121, 0.24), transparent 32%),
     var(--portal-bg);
   color: var(--portal-text);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   position: relative;
 }
 
@@ -440,12 +442,15 @@ input, select, textarea { font-family: "DM Sans", "Segoe UI", sans-serif; }
 
 @media (max-width: 860px) {
   .page-auth {
+    min-height: 100dvh;
     padding: 18px;
+    align-items: flex-start;
   }
 
   .card-auth {
     grid-template-columns: 1fr;
     min-height: auto;
+    margin: 8px auto;
   }
 
   .auth-panel {
