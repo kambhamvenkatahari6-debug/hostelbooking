@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Check Fee Due</title>
+  <link rel="stylesheet" href="app.css">
+  <style>
+    body { background: #394c7a; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .box { background: #ffffff; padding: 35px; border-radius: 12px; width: 360px; text-align: center; }
+    input { width: 92%; padding: 10px; margin-top: 10px; border-radius: 6px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>Check Hostel Fee</h2>
+  <input type="text" id="reg" placeholder="Enter Registration Number">
+  <br>
+  <button class="button" onclick="checkFee()">Check Fee</button>
+  <p id="fee"></p>
+  <button id="payBtn" class="button" style="display:none" onclick="goToPayment()">Pay</button>
+</div>
+
+<script>
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+let eventsStream = null;
+document.getElementById("reg").value = localStorage.getItem("regNo") || "";
+
+async function checkFee(){
+  const reg = document.getElementById("reg").value.trim();
+  if(!reg){
+    document.getElementById("fee").innerText = "Please enter registration number.";
+    return;
+  }
+
+  try{
+    const response = await fetch(apiBase + "/api/check-fee?reg_no=" + encodeURIComponent(reg));
+    const data = await response.json();
+
+    if(!response.ok || !data.success){
+      document.getElementById("fee").innerText = data.message || "Unable to fetch fee details.";
+      document.getElementById("payBtn").style.display = "none";
+      return;
+    }
+
+    localStorage.setItem("regNo", reg);
+    localStorage.setItem("roomType", data.booking.roomType);
+    localStorage.setItem("floor", data.booking.floor);
+    localStorage.setItem("roomNo", data.booking.roomNo);
+    localStorage.setItem("cost", data.dueAmount);
+
+    if(data.paid){
+      document.getElementById("fee").innerText = "No fee due. Payment already completed.";
+      document.getElementById("payBtn").style.display = "none";
+      return;
+    }
+
+    document.getElementById("fee").innerText = "Fee Due: Rs " + data.dueAmount;
+    document.getElementById("payBtn").style.display = "inline-block";
+  }catch(err){
+    document.getElementById("fee").innerText = "Unable to connect to server. Start backend on http://localhost:8080";
+  }
+}
+
+function goToPayment(){
+  window.location.href = "payment.html";
+}
+
+function connectRealtime(){
+  if(typeof EventSource === "undefined"){
+    return;
+  }
+  const setup = () => {
+    eventsStream = new EventSource(apiBase + "/api/events");
+    const maybeRefresh = (event) => {
+      const currentReg = document.getElementById("reg").value.trim();
+      if(!currentReg) return;
+      try{
+        const payload = JSON.parse(event.data || "{}");
+        if(payload.regNo && payload.regNo !== currentReg){
+          return;
+        }
+      }catch(err){}
+      checkFee();
+    };
+    eventsStream.addEventListener("BOOKING_UPDATED", maybeRefresh);
+    eventsStream.addEventListener("PAYMENT_UPDATED", maybeRefresh);
+    eventsStream.onerror = () => {
+      if(eventsStream) eventsStream.close();
+      setTimeout(setup, 2000);
+    };
+  };
+  setup();
+  window.addEventListener("beforeunload", () => {
+    if(eventsStream) eventsStream.close();
+  });
+}
+
+if(document.getElementById("reg").value){
+  checkFee();
+}
+connectRealtime();
+setInterval(() => {
+  if(document.getElementById("reg").value.trim()){
+    checkFee();
+  }
+}, 15000);
+</script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Request</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F2ED;
+      --card: #FFFFFF;
+      --accent: #C8692A;
+      --accent-light: #F4E6D8;
+      --accent-dark: #A0501E;
+      --text: #1A1410;
+      --muted: #8A7E74;
+      --border: #E0D8CF;
+      --input-bg: #FAFAF8;
+      --granted: #2A7A4A;
+      --denied: #C82A2A;
+      --pending: #C8692A;
+    }
+
+    body {
+      font-family: "DM Sans", sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 80px;
+      position: relative;
+      overflow-x: hidden;
+      color: var(--text);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: -120px;
+      right: -120px;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200, 105, 42, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      bottom: -80px;
+      left: -80px;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200, 105, 42, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeDown 0.6s ease both;
+    }
+
+    .header-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .header h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .header-line {
+      width: 48px;
+      height: 3px;
+      background: var(--accent);
+      margin: 16px auto 0;
+      border-radius: 2px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 48px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04), 0 24px 60px rgba(0, 0, 0, 0.08);
+      border: 1px solid var(--border);
+      animation: fadeUp 0.7s ease both;
+      animation-delay: 0.1s;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .field-group { margin-bottom: 20px; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      padding: 14px 18px;
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(200, 105, 42, 0.1);
+    }
+
+    input::placeholder,
+    textarea::placeholder { color: #C4BAB2; }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      line-height: 1.6;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    .date-hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      font-family: "DM Sans", sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      margin-top: 8px;
+      box-shadow: 0 4px 16px rgba(200, 105, 42, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(200, 105, 42, 0.35);
+    }
+
+    .btn-submit:disabled {
+      cursor: wait;
+      opacity: 0.8;
+      transform: none;
+    }
+
+    .btn-submit svg { width: 18px; height: 18px; }
+
+    .message {
+      margin-top: 14px;
+      min-height: 20px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .recent-section {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 32px;
+      animation: fadeUp 0.8s ease both;
+      animation-delay: 0.25s;
+    }
+
+    .recent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+
+    .recent-title {
+      font-family: "Playfair Display", serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .recent-count {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: var(--accent-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .leave-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .leave-card:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+      transform: translateY(-2px);
+    }
+
+    .leave-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Playfair Display", serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .leave-info { flex: 1; min-width: 0; }
+
+    .leave-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .leave-dates {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .status-granted {
+      background: #E6F4EC;
+      color: var(--granted);
+    }
+
+    .status-denied {
+      background: #FDEAEA;
+      color: var(--denied);
+    }
+
+    .status-pending {
+      background: var(--accent-light);
+      color: var(--pending);
+    }
+
+    .empty-state {
+      background: var(--card);
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px; }
+      .field-row { grid-template-columns: 1fr; }
+      .header h1 { font-size: 32px; }
+      .recent-header { flex-direction: column; align-items: flex-start; }
+      .leave-card { padding: 18px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-eyebrow">Hostel Portal</div>
+    <h1>Leave Request</h1>
+    <div class="header-line"></div>
+  </div>
+
+  <div class="card">
+    <form id="leaveForm">
+      <div class="section-label">Student Details</div>
+
+      <div class="field-group">
+        <label for="regNo">Registration Number</label>
+        <input id="regNo" type="text" name="reg_no" placeholder="Registration Number" required>
+      </div>
+
+      <div class="field-group">
+        <label for="studentName">Full Name</label>
+        <input id="studentName" type="text" name="name" placeholder="Your full name" required>
+      </div>
+
+      <div class="field-group">
+        <label for="contact">Contact Number</label>
+        <input id="contact" type="tel" name="contact" placeholder="+91 00000 00000" required>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section-label">Leave Details</div>
+
+      <div class="field-group">
+        <label for="purpose">Reason for Leave</label>
+        <textarea id="purpose" name="purpose" placeholder="Briefly describe the reason for your leave..." required></textarea>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label for="leaveDate">Leave Date</label>
+          <input id="leaveDate" type="date" name="leave_date" required>
+          <div class="date-hint">Start of absence</div>
+        </div>
+        <div>
+          <label for="returnDate">Return Date</label>
+          <input id="returnDate" type="date" name="return_date" required>
+          <div class="date-hint">First day back</div>
+        </div>
+      </div>
+
+      <button class="btn-submit" type="submit" id="submitBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 2L11 13"></path>
+          <path d="M22 2L15 22 11 13 2 9l20-7z"></path>
+        </svg>
+        <span id="submitLabel">Submit Request</span>
+      </button>
+      <p id="msg" class="message"></p>
+    </form>
+  </div>
+
+  <div class="recent-section">
+    <div class="recent-header">
+      <div class="recent-title">Recent Applications</div>
+      <div class="recent-count" id="recentCount">Loading...</div>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+  <script>
+    const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+    const leaveForm = document.getElementById("leaveForm");
+    const regInput = document.getElementById("regNo");
+    const nameInput = document.getElementById("studentName");
+    const contactInput = document.getElementById("contact");
+    const leaveDateInput = document.getElementById("leaveDate");
+    const returnDateInput = document.getElementById("returnDate");
+    const msg = document.getElementById("msg");
+    const submitBtn = document.getElementById("submitBtn");
+    const submitLabel = document.getElementById("submitLabel");
+    const historyList = document.getElementById("historyList");
+    const recentCount = document.getElementById("recentCount");
+    let eventsStream = null;
+
+    regInput.value = localStorage.getItem("regNo") || "";
+    nameInput.value = localStorage.getItem("studentName") || "";
+
+    const today = new Date().toISOString().split("T")[0];
+    leaveDateInput.min = today;
+    returnDateInput.min = today;
+
+    leaveDateInput.addEventListener("change", () => {
+      returnDateInput.min = leaveDateInput.value || today;
+      if (returnDateInput.value && leaveDateInput.value && returnDateInput.value < leaveDateInput.value) {
+        returnDateInput.value = leaveDateInput.value;
+      }
+    });
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function statusClass(status) {
+      if (status === "GRANTED") return "status-granted";
+      if (status === "REJECTED") return "status-denied";
+      return "status-pending";
+    }
+
+    function titleCaseStatus(status) {
+      if (status === "GRANTED") return "Granted";
+      if (status === "REJECTED") return "Denied";
+      return "Pending";
+    }
+
+    function initials(name) {
+      return (name || "S")
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => part[0])
+        .join("")
+        .substring(0, 1)
+        .toUpperCase() || "S";
+    }
+
+    function setMessage(text, isError) {
+      msg.textContent = text;
+      msg.style.color = isError ? "var(--denied)" : "var(--muted)";
+    }
+
+    async function loadMyLeaves() {
+      const regNo = regInput.value.trim();
+      if (!regNo) {
+        recentCount.textContent = "0 this month";
+        historyList.innerHTML = '<div class="empty-state">Enter registration number to view your recent leave applications.</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch(apiBase + "/api/my-leaves?reg_no=" + encodeURIComponent(regNo));
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          recentCount.textContent = "0 this month";
+          historyList.innerHTML = '<div class="empty-state">' + escapeHtml(data.message || "Failed to load leave history.") + '</div>';
+          return;
+        }
+
+        const records = data.records || [];
+        const monthKey = new Date().toISOString().slice(0, 7);
+        const monthCount = records.filter((record) => (record.createdAt || "").startsWith(monthKey)).length;
+        recentCount.textContent = monthCount + " this month";
+
+        if (records.length === 0) {
+          historyList.innerHTML = '<div class="empty-state">No leave applications yet. Your recent requests will appear here in real time.</div>';
+          return;
+        }
+
+        historyList.innerHTML = records.map((record) => `
+          <div class="leave-card">
+            <div class="leave-avatar">${escapeHtml(initials(record.name || nameInput.value || "S"))}</div>
+            <div class="leave-info">
+              <div class="leave-name">${escapeHtml(record.name || "Student")}</div>
+              <div class="leave-dates">${escapeHtml(record.leaveDate)} -> ${escapeHtml(record.returnDate)} | ${escapeHtml(record.purpose || "No reason provided")}</div>
+            </div>
+            <div class="status-badge ${statusClass(record.status)}">${titleCaseStatus(record.status)}</div>
+          </div>
+        `).join("");
+      } catch (err) {
+        recentCount.textContent = "0 this month";
+        historyList.innerHTML = '<div class="empty-state">Unable to connect to backend.</div>';
+      }
+    }
+
+    leaveForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      if (leaveDateInput.value && returnDateInput.value && returnDateInput.value < leaveDateInput.value) {
+        setMessage("Return date cannot be earlier than leave date.", true);
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitLabel.textContent = "Submitting...";
+      setMessage("Sending leave request...", false);
+      const formData = new URLSearchParams(new FormData(this));
+
+      try {
+        const response = await fetch(apiBase + "/api/leave", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData.toString()
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          setMessage(data.message || "Failed to submit leave request", true);
+          submitBtn.disabled = false;
+          submitLabel.textContent = "Submit Request";
+          return;
+        }
+
+        setMessage("Leave submitted successfully.", false);
+        await loadMyLeaves();
+        submitBtn.disabled = false;
+        submitLabel.textContent = "Submit Request";
+        setTimeout(() => { window.location.href = "leave-success.html"; }, 700);
+      } catch (err) {
+        setMessage("Unable to connect to server. Start backend on http://localhost:8080", true);
+        submitBtn.disabled = false;
+        submitLabel.textContent = "Submit Request";
+      }
+    });
+
+    function connectRealtime() {
+      if (typeof EventSource === "undefined") return;
+      const setup = () => {
+        eventsStream = new EventSource(apiBase + "/api/events");
+        eventsStream.addEventListener("LEAVE_UPDATED", (event) => {
+          const currentRegNo = regInput.value.trim();
+          if (!currentRegNo) return;
+          try {
+            const payload = JSON.parse(event.data || "{}");
+            if (!payload.regNo || payload.regNo === currentRegNo) {
+              loadMyLeaves();
+            }
+          } catch (err) {}
+        });
+        eventsStream.onerror = () => {
+          if (eventsStream) eventsStream.close();
+          setTimeout(setup, 2000);
+        };
+      };
+      setup();
+      window.addEventListener("beforeunload", () => {
+        if (eventsStream) eventsStream.close();
+      });
+    }
+
+    regInput.addEventListener("change", loadMyLeaves);
+    loadMyLeaves();
+    connectRealtime();
+    setInterval(loadMyLeaves, 15000);
+  </script>
+</body>
+</html>
+

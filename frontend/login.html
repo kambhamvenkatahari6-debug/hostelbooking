@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="page-auth">
+  <div class="card-auth">
+    <section class="auth-panel auth-panel--brand">
+      <div class="auth-brand">
+        <div class="auth-badge">Vignan Institutions</div>
+        <h1 class="auth-title">Hostel <span>Management System</span></h1>
+        <p class="auth-copy">Secure access for student hostel services, room allocation, and account management.</p>
+      </div>
+    </section>
+
+    <section class="auth-panel auth-panel--form">
+      <div class="auth-form-shell">
+        <div class="auth-tabs">
+          <a class="auth-tab active" href="login.html">Student</a>
+          <a class="auth-tab" href="warden-login.html">Warden</a>
+          <a class="auth-tab" href="create-account.html">Register</a>
+        </div>
+
+        <div id="loginView">
+          <h2 class="auth-heading">Student Login</h2>
+          <p class="auth-subheading">Enter your student email or registration number and password.</p>
+
+          <form id="loginForm">
+            <label class="field-label" for="email">Email / Registration Number</label>
+            <div class="input-wrap">
+              <span class="input-icon">@</span>
+              <input id="email" type="text" name="email" placeholder="your@college.edu or 22BCS1042" required>
+            </div>
+
+            <label class="field-label" for="password">Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">#</span>
+              <input id="password" type="password" name="password" placeholder="Enter your password" required>
+            </div>
+
+            <button class="button" type="submit">Sign In</button>
+          </form>
+
+          <p id="msg" class="helper-text"></p>
+
+          <div class="auth-links">
+            <a class="link" href="#" id="forgotLink">Forgot Password?</a>
+          </div>
+        </div>
+
+        <div id="forgotView" class="auth-hidden">
+          <h2 class="auth-heading">Reset Password</h2>
+          <p class="auth-subheading">Verify your registration number and date of birth to create a new password.</p>
+
+          <form id="forgotForm">
+            <label class="field-label" for="forgotRegNo">Registration Number</label>
+            <div class="input-wrap">
+              <span class="input-icon">#</span>
+              <input id="forgotRegNo" type="text" name="reg_no" placeholder="22BCS1042" required>
+            </div>
+
+            <label class="field-label" for="forgotDob">Date of Birth</label>
+            <div class="input-wrap">
+              <span class="input-icon">*</span>
+              <input id="forgotDob" type="date" name="dob" required>
+            </div>
+
+            <label class="field-label" for="newPassword">New Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">+</span>
+              <input id="newPassword" type="password" name="new_password" placeholder="Create a new password" required>
+            </div>
+
+            <button class="button" type="submit">Reset Password</button>
+          </form>
+
+          <p id="forgotMsg" class="helper-text"></p>
+
+          <div class="auth-links">
+            <a class="link" href="#" id="backToLogin">Back to Login</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const loginView = document.getElementById("loginView");
+const forgotView = document.getElementById("forgotView");
+const msg = document.getElementById("msg");
+const forgotMsg = document.getElementById("forgotMsg");
+
+function showForgot(show) {
+  loginView.classList.toggle("auth-hidden", show);
+  forgotView.classList.toggle("auth-hidden", !show);
+  msg.textContent = "";
+  forgotMsg.textContent = "";
+}
+
+document.getElementById("forgotLink").addEventListener("click", function (e) {
+  e.preventDefault();
+  showForgot(true);
+});
+
+document.getElementById("backToLogin").addEventListener("click", function (e) {
+  e.preventDefault();
+  showForgot(false);
+});
+
+document.getElementById("loginForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const formData = new URLSearchParams(new FormData(this));
+
+  try {
+    const response = await fetch(apiBase + "/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      msg.textContent = data.message || "Login failed";
+      return;
+    }
+
+    localStorage.setItem("regNo", data.regNo);
+    localStorage.setItem("studentName", data.name);
+    window.location.href = "dashboard.html?v=4";
+  } catch (err) {
+    msg.textContent = "Unable to connect to server. Start backend on http://localhost:8080";
+  }
+});
+
+document.getElementById("forgotForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const formData = new URLSearchParams(new FormData(this));
+
+  try {
+    const response = await fetch(apiBase + "/api/student-reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      forgotMsg.textContent = data.message || "Password reset failed";
+      return;
+    }
+
+    forgotMsg.textContent = "Password reset successful. Use your new password to sign in.";
+    this.reset();
+  } catch (err) {
+    forgotMsg.textContent = "Unable to connect to server. Start backend on http://localhost:8080";
+  }
+});
+</script>
+</body>
+</html>

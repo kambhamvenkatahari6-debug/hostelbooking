@@ -1,0 +1,774 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink: #1a1a2e;
+      --ink-2: #4a4a6a;
+      --ink-3: #8888aa;
+      --surface: #ffffff;
+      --surface-2: #f5f4f0;
+      --accent: #5c4fd6;
+      --accent-light: #ede9ff;
+      --green: #1a7a5e;
+      --green-light: #e0f5ef;
+      --amber: #b06020;
+      --amber-light: #fff3e0;
+      --red: #b03030;
+      --red-light: #ffebeb;
+      --border: rgba(0, 0, 0, 0.08);
+      --font-body: "DM Sans", sans-serif;
+      --font-display: "Playfair Display", serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--surface-2);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    .portal {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2.5rem;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: #ffffff;
+    }
+
+    .nav-title {
+      font-family: var(--font-display);
+      font-size: 17px;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-tag {
+      font-size: 12px;
+      background: var(--accent-light);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+    }
+
+    .greeting {
+      font-size: 13px;
+      color: var(--ink-3);
+      font-weight: 400;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .headline {
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--ink);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .headline span {
+      color: var(--accent);
+    }
+
+    .status-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-light);
+      border: 1px solid rgba(26, 122, 94, 0.15);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 2rem;
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-text {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    .status-sub {
+      color: var(--ink-3);
+      font-size: 12px;
+      margin-left: auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--ink-3);
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 2.5rem;
+    }
+
+    .action-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 16px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(92, 79, 214, 0.1);
+    }
+
+    .card-icon-wrap {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .card-icon-wrap svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .c-purple .card-icon-wrap { background: var(--accent-light); }
+    .c-purple .card-icon-wrap svg { fill: var(--accent); }
+    .c-green .card-icon-wrap { background: var(--green-light); }
+    .c-green .card-icon-wrap svg { fill: var(--green); }
+    .c-amber .card-icon-wrap { background: var(--amber-light); }
+    .c-amber .card-icon-wrap svg { fill: var(--amber); }
+    .c-red .card-icon-wrap { background: var(--red-light); }
+    .c-red .card-icon-wrap svg { fill: var(--red); }
+
+    .card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--ink-3);
+      line-height: 1.4;
+    }
+
+    .card-arrow {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-size: 16px;
+      color: rgba(0, 0, 0, 0.12);
+      transition: color 0.18s;
+    }
+
+    .action-card:hover .card-arrow {
+      color: var(--accent);
+    }
+
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 2rem;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-link {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 400;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .room-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      gap: 10px;
+    }
+
+    .room-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .room-label { color: var(--ink-3); }
+    .room-value {
+      font-weight: 500;
+      color: var(--ink);
+      text-align: right;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .badge-green { background: var(--green-light); color: var(--green); }
+    .badge-amber { background: var(--amber-light); color: var(--amber); }
+    .badge-red { background: var(--red-light); color: var(--red); }
+
+    .meal-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .meal-item:last-child { border-bottom: none; }
+
+    .meal-time {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--ink-3);
+      margin-bottom: 2px;
+      font-weight: 500;
+    }
+
+    .meal-name {
+      color: var(--ink);
+      font-weight: 400;
+    }
+
+    .notice-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .notice-item:last-child { border-bottom: none; }
+
+    .notice-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .notice-text {
+      font-size: 13px;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .notice-date {
+      font-size: 11px;
+      color: var(--ink-3);
+      margin-top: 2px;
+    }
+
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    .fee-amount {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: var(--ink);
+      margin: 12px 0 4px;
+    }
+
+    .fee-label {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-bottom: 16px;
+    }
+
+    .fee-bar-bg {
+      height: 6px;
+      background: var(--surface-2);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .fee-bar-fill {
+      height: 100%;
+      background: var(--amber);
+      border-radius: 10px;
+      width: 0;
+      transition: width 0.5s;
+    }
+
+    .fee-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--ink-3);
+      margin-bottom: 16px;
+      gap: 10px;
+    }
+
+    .pay-btn {
+      width: 100%;
+      background: var(--ink);
+      color: #ffffff;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .pay-btn:hover {
+      background: var(--accent);
+    }
+
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--ink);
+      transition: color 0.15s;
+    }
+
+    .quick-link:last-child { border-bottom: none; }
+    .quick-link:hover { color: var(--accent); }
+
+    .quick-link-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .quick-link span { flex: 1; }
+
+    .quick-link-arr {
+      color: var(--ink-3);
+      font-size: 14px;
+    }
+
+    .empty-note {
+      font-size: 13px;
+      color: var(--ink-3);
+      line-height: 1.5;
+      padding: 8px 0 2px;
+    }
+
+    @media (max-width: 640px) {
+      .action-grid { grid-template-columns: repeat(2, 1fr); }
+      .panels, .bottom-row { grid-template-columns: 1fr; }
+      .status-sub { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="portal">
+    <div class="nav">
+      <div class="nav-brand">
+        <div class="nav-icon">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        </div>
+        <span class="nav-title">Vignan Hostel</span>
+      </div>
+      <div class="nav-right">
+        <span class="nav-tag">Student Portal</span>
+        <div class="avatar" id="avatar" title="Student">ST</div>
+      </div>
+    </div>
+
+    <div class="header">
+      <div class="greeting" id="greetingDate">Loading date...</div>
+      <div class="headline">Good morning, <span id="studentFirstName">Student</span></div>
+    </div>
+
+    <div class="status-strip">
+      <div class="status-dot"></div>
+      <div class="status-text" id="statusText">Checking room allocation...</div>
+      <div class="status-sub" id="statusSub">Waiting for booking details</div>
+    </div>
+
+    <div class="section-label">Quick Actions</div>
+
+    <div class="action-grid">
+      <div class="action-card c-purple" onclick="window.location.href='book-room.html'">
+        <span class="card-arrow">-></span>
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/></svg>
+        </div>
+        <div class="card-name">Book Room</div>
+        <div class="card-desc">Reserve hostel room</div>
+      </div>
+      <div class="action-card c-green" onclick="window.location.href='leave-request.html'">
+        <span class="card-arrow">-></span>
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M14 6l-1-2H5v17h2v-7h5l1 2h7V6h-6zm4 8h-4l-1-2H7V6h5l1 2h5v6z"/></svg>
+        </div>
+        <div class="card-name">Leave Request</div>
+        <div class="card-desc">Submit application</div>
+      </div>
+      <div class="action-card c-amber" onclick="window.location.href='check-fee.html'">
+        <span class="card-arrow">-></span>
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+        </div>
+        <div class="card-name">Payments</div>
+        <div class="card-desc">Hostel fees & dues</div>
+      </div>
+      <div class="action-card c-red" onclick="window.location.href='mess-menu.html'">
+        <span class="card-arrow">-></span>
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M18.06 22.99h1.66c.84 0 1.53-.64 1.63-1.46L23 5.05h-5V1h-1.97v4.05h-4.97l.3 2.34c1.71.47 3.31 1.32 4.27 2.26 1.44 1.42 2.43 2.89 2.43 5.29v8.05zM1 21.99V21h15.03v.99c0 .55-.45 1-1.01 1H2.01c-.56 0-1.01-.45-1.01-1zm15.03-7c0-8-15.03-8-15.03 0h15.03zM1.02 17h15v2H1z"/></svg>
+        </div>
+        <div class="card-name">Mess Menu</div>
+        <div class="card-desc">Weekly meal plan</div>
+      </div>
+    </div>
+
+    <div class="panels">
+      <div class="panel">
+        <div class="panel-title">Room Details <a class="panel-link" href="book-room.html">Edit request</a></div>
+        <div class="room-row"><span class="room-label">Room No.</span><span class="room-value" id="roomNoValue">Not booked</span></div>
+        <div class="room-row"><span class="room-label">Floor</span><span class="room-value" id="roomFloorValue">-</span></div>
+        <div class="room-row"><span class="room-label">Room Type</span><span class="room-value" id="roomTypeValue">-</span></div>
+        <div class="room-row"><span class="room-label">Occupancy</span><span class="room-value" id="roomOccupancyValue">Not available</span></div>
+        <div class="room-row"><span class="room-label">Payment</span><span class="room-value" id="paymentBadgeWrap"><span class="badge badge-amber">Pending</span></span></div>
+        <div class="room-row"><span class="room-label">Status</span><span class="room-value" id="roomStatusWrap"><span class="badge badge-red">Awaiting booking</span></span></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Today's Mess <a class="panel-link" href="mess-menu.html">Full week -></a></div>
+        <div id="messPanel"></div>
+      </div>
+    </div>
+
+    <div class="bottom-row">
+      <div class="panel">
+        <div class="panel-title">Hostel Notices <span class="panel-link">View all</span></div>
+        <div id="noticesPanel"></div>
+      </div>
+
+      <div>
+        <div class="panel" style="margin-bottom: 16px;">
+          <div class="panel-title">Pending Fee</div>
+          <div class="fee-amount" id="feeAmount">Rs 0</div>
+          <div class="fee-label" id="feeLabel">No pending fee right now</div>
+          <div class="fee-bar-bg"><div class="fee-bar-fill" id="feeBarFill"></div></div>
+          <div class="fee-bar-labels"><span id="paidLabel">Paid Rs 0</span><span id="totalLabel">Total Rs 0</span></div>
+          <button class="pay-btn" id="payBtn" onclick="goToPayment()">Pay Now</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title" style="margin-bottom: 12px;">Quick Links</div>
+          <div class="quick-link" onclick="window.location.href='leave-request.html'"><div class="quick-link-icon">LV</div><span>My Leave Requests</span><span class="quick-link-arr">-></span></div>
+          <div class="quick-link" onclick="window.location.href='room-structure.html'"><div class="quick-link-icon">RM</div><span>Room Structure</span><span class="quick-link-arr">-></span></div>
+          <div class="quick-link" onclick="window.location.href='rules.html'"><div class="quick-link-icon">RL</div><span>Hostel Rules</span><span class="quick-link-arr">-></span></div>
+          <div class="quick-link" onclick="window.location.href='login.html'"><div class="quick-link-icon">LG</div><span>Logout</span><span class="quick-link-arr">-></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+    const regNo = localStorage.getItem("regNo");
+    const studentName = localStorage.getItem("studentName") || "Student";
+    const today = new Date();
+    let eventsStream = null;
+
+    function buildInitials(name) {
+      return name
+        .split(" ")
+        .filter(Boolean)
+        .map((word) => word[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase();
+    }
+
+    function firstName(name) {
+      return (name.split(" ").filter(Boolean)[0] || "Student").trim();
+    }
+
+    function roomTypeLabel(type) {
+      if (type === "AC") return "AC";
+      if (type === "NON_AC_STANDARD") return "Non AC Standard";
+      if (type === "NON_AC_ECONOMY") return "Non AC Economy";
+      return "-";
+    }
+
+    function occupancyLabel(type) {
+      if (type === "AC") return "2 to 6 sharing";
+      if (type === "NON_AC_STANDARD") return "4 to 8 sharing";
+      if (type === "NON_AC_ECONOMY") return "6 to 10 sharing";
+      return "Not available";
+    }
+
+    function formatDate() {
+      document.getElementById("greetingDate").textContent = today.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function renderMessPanel(meals) {
+      document.getElementById("messPanel").innerHTML = meals.map((meal) => `
+        <div class="meal-item">
+          <div class="meal-time">${meal.label} - ${meal.time}</div>
+          <div class="meal-name">${meal.item}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderNoticesPanel(notices) {
+      document.getElementById("noticesPanel").innerHTML = notices.map((notice) => `
+        <div class="notice-item">
+          <div class="notice-dot"></div>
+          <div>
+            <div class="notice-text">${notice.text}</div>
+            <div class="notice-date">${notice.date} | ${notice.source}</div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function updateStatusStrip(text, subText) {
+      document.getElementById("statusText").textContent = text;
+      document.getElementById("statusSub").textContent = subText;
+    }
+
+    function renderNoBooking() {
+      document.getElementById("roomNoValue").textContent = "Not booked";
+      document.getElementById("roomFloorValue").textContent = "-";
+      document.getElementById("roomTypeValue").textContent = "-";
+      document.getElementById("roomOccupancyValue").textContent = "Not available";
+      document.getElementById("paymentBadgeWrap").innerHTML = '<span class="badge badge-amber">Pending</span>';
+      document.getElementById("roomStatusWrap").innerHTML = '<span class="badge badge-red">Awaiting booking</span>';
+      updateStatusStrip("No active room booking", "Use Book Room to reserve your hostel room");
+    }
+
+    function renderBookingDetails(booking) {
+        if (!booking) {
+          renderNoBooking();
+          return;
+        }
+        document.getElementById("roomNoValue").textContent = booking.roomNo || "-";
+        document.getElementById("roomFloorValue").textContent = booking.floor ? booking.floor + " Floor" : "-";
+        document.getElementById("roomTypeValue").textContent = roomTypeLabel(booking.roomType);
+        document.getElementById("roomOccupancyValue").textContent = booking.members ? booking.members + " sharing" : occupancyLabel(booking.roomType);
+        document.getElementById("paymentBadgeWrap").innerHTML =
+          booking.paymentStatus === "PAID"
+            ? '<span class="badge badge-green">Paid</span>'
+            : '<span class="badge badge-amber">Pending</span>';
+        document.getElementById("roomStatusWrap").innerHTML = '<span class="badge badge-green">Active</span>';
+        updateStatusStrip(
+          "Room " + booking.roomNo + " - Floor " + booking.floor,
+          booking.paymentStatus === "PAID" ? "Booking confirmed and payment completed" : "Booking saved, payment pending"
+        );
+    }
+
+    function renderFeeDetails(fee) {
+      const feeAmount = document.getElementById("feeAmount");
+      const feeLabel = document.getElementById("feeLabel");
+      const feeBarFill = document.getElementById("feeBarFill");
+      const paidLabel = document.getElementById("paidLabel");
+      const totalLabel = document.getElementById("totalLabel");
+      const payBtn = document.getElementById("payBtn");
+
+      feeAmount.textContent = "Rs " + Number(fee.dueAmount || 0).toLocaleString("en-IN");
+      feeLabel.textContent = fee.message || "No fee details available";
+      const total = Number(fee.totalAmount || 0);
+      const paid = Number(fee.paidAmount || 0);
+      const percent = total > 0 ? Math.round((paid / total) * 100) : 0;
+      feeBarFill.style.width = Math.max(0, Math.min(100, percent)) + "%";
+      paidLabel.textContent = "Paid Rs " + paid.toLocaleString("en-IN");
+      totalLabel.textContent = "Total Rs " + total.toLocaleString("en-IN");
+      payBtn.style.display = fee.hasBooking && !fee.paid ? "block" : "none";
+    }
+
+    async function loadDashboardSummary() {
+      if (!regNo) {
+        renderNoBooking();
+        renderFeeDetails({ hasBooking: false, dueAmount: 0, paidAmount: 0, totalAmount: 0, message: "Login required", paid: false });
+        renderMessPanel([]);
+        renderNoticesPanel([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(apiBase + "/api/dashboard-summary?reg_no=" + encodeURIComponent(regNo));
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          renderNoBooking();
+          return;
+        }
+
+        renderBookingDetails(data.booking);
+        renderFeeDetails(data.fee || { hasBooking: false, dueAmount: 0, paidAmount: 0, totalAmount: 0, message: "No fee details available", paid: false });
+        renderMessPanel(data.meals || []);
+        renderNoticesPanel(data.notices || []);
+      } catch (err) {
+        renderNoBooking();
+      }
+    }
+
+    function goToPayment() {
+      window.location.href = "payment.html";
+    }
+
+    function connectRealtime() {
+      if (!regNo || typeof EventSource === "undefined") return;
+      const setup = () => {
+        eventsStream = new EventSource(apiBase + "/api/events");
+        const refreshIfMine = (event) => {
+          try {
+            const payload = JSON.parse(event.data || "{}");
+            if (!payload.regNo || payload.regNo === regNo) {
+              loadDashboardSummary();
+            }
+          } catch (err) {}
+        };
+        eventsStream.addEventListener("BOOKING_UPDATED", refreshIfMine);
+        eventsStream.addEventListener("PAYMENT_UPDATED", refreshIfMine);
+        eventsStream.addEventListener("LEAVE_UPDATED", refreshIfMine);
+        eventsStream.onerror = () => {
+          if (eventsStream) eventsStream.close();
+          setTimeout(setup, 2000);
+        };
+      };
+      setup();
+      window.addEventListener("beforeunload", () => {
+        if (eventsStream) eventsStream.close();
+      });
+    }
+
+    document.getElementById("avatar").textContent = buildInitials(studentName) || "ST";
+    document.getElementById("avatar").title = studentName;
+    document.getElementById("studentFirstName").textContent = firstName(studentName);
+    formatDate();
+    loadDashboardSummary();
+    connectRealtime();
+    setInterval(loadDashboardSummary, 15000);
+  </script>
+</body>
+</html>
+

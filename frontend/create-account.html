@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Account</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="page-auth">
+  <div class="card-auth">
+    <section class="auth-panel auth-panel--brand">
+      <div class="auth-brand">
+        <div class="auth-badge">Vignan Institutions</div>
+        <h1 class="auth-title">Student <span>Registration</span></h1>
+        <p class="auth-copy">Create a hostel portal account using the student details required by this project.</p>
+      </div>
+    </section>
+
+    <section class="auth-panel auth-panel--form">
+      <div class="auth-form-shell">
+        <div class="auth-tabs">
+          <a class="auth-tab" href="login.html">Student</a>
+          <a class="auth-tab" href="warden-login.html">Warden</a>
+          <a class="auth-tab active" href="create-account.html">Register</a>
+        </div>
+
+        <h2 class="auth-heading">Create Account</h2>
+        <p class="auth-subheading">Enter your student profile details to register.</p>
+
+        <form id="signupForm">
+          <label class="field-label" for="name">Student Name</label>
+          <div class="input-wrap">
+            <span class="input-icon">S</span>
+            <input id="name" type="text" name="name" placeholder="Enter full name" required>
+          </div>
+
+          <label class="field-label" for="regNo">Registration Number</label>
+          <div class="input-wrap">
+            <span class="input-icon">#</span>
+            <input id="regNo" type="text" name="reg_no" placeholder="22BCS1042" required>
+          </div>
+
+          <label class="field-label" for="email">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon">@</span>
+            <input id="email" type="email" name="email" placeholder="your@college.edu" required>
+          </div>
+
+          <label class="field-label" for="dob">Date of Birth</label>
+          <div class="input-wrap">
+            <span class="input-icon">*</span>
+            <input id="dob" type="date" name="dob" required>
+          </div>
+
+          <label class="field-label" for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">+</span>
+            <input id="password" type="password" name="password" placeholder="Create password" required>
+          </div>
+
+          <button class="button" type="submit">Create Account</button>
+        </form>
+
+        <p id="msg" class="helper-text"></p>
+      </div>
+    </section>
+  </div>
+
+<script>
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const form = document.getElementById("signupForm");
+const msg = document.getElementById("msg");
+
+form.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const formData = new URLSearchParams(new FormData(this));
+
+  try {
+    const response = await fetch(apiBase + "/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      msg.textContent = data.message || "Signup failed";
+      return;
+    }
+
+    msg.textContent = "Account created successfully. Redirecting to login...";
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 1200);
+  } catch (err) {
+    msg.textContent = "Unable to connect to server.";
+  }
+});
+</script>
+</body>
+</html>

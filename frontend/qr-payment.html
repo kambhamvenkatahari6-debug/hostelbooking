@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Payment</title>
+  <link rel="stylesheet" href="app.css">
+  <style>
+    body { background: #394c7a; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .box { background: #ffffff; padding: 35px; border-radius: 12px; text-align: center; width: 380px; }
+    input { padding: 10px; width: 80%; margin-top: 10px; }
+    .qr-wrap { margin: 14px auto 8px; padding: 12px; border: 1px solid #dbe3f0; border-radius: 10px; width: 248px; background: #f8fafc; }
+    .qr-img { width: 220px; height: 220px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; display: block; margin: 0 auto; }
+    .qr-meta { margin-top: 8px; font-size: 12px; color: #64748b; line-height: 1.4; }
+    .amount { font-weight: 700; color: #1e293b; }
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>Scan and Pay</h2>
+  <div class="muted" style="margin:10px 0;">Use your payment app and enter the UTR number</div>
+  <div class="qr-wrap">
+    <img id="qrImage" class="qr-img" alt="Payment QR code">
+    <div class="qr-meta">
+      UPI ID: <span id="upiIdText">vignanhostel@upi</span><br>
+      Amount: <span class="amount" id="amountText">Rs 0</span>
+    </div>
+  </div>
+
+  <form id="qrPayForm">
+    <input type="text" name="utr" placeholder="Enter UTR Number" required>
+    <input type="hidden" name="roomType" id="roomType">
+    <input type="hidden" name="floor" id="floor">
+    <input type="hidden" name="roomNo" id="roomNo">
+    <input type="hidden" name="amount" id="amount">
+    <br>
+    <button class="button" type="submit">Payment Successful</button>
+  </form>
+  <p id="msg" class="muted"></p>
+</div>
+
+<script>
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const regNo = localStorage.getItem("regNo");
+const cost = localStorage.getItem("cost");
+const upiId = "vignanhostel@upi";
+const payeeName = "Vignan Hostel";
+
+document.getElementById("roomType").value = localStorage.getItem("roomType") || "";
+document.getElementById("floor").value = localStorage.getItem("floor") || "";
+document.getElementById("roomNo").value = localStorage.getItem("roomNo") || "";
+document.getElementById("amount").value = cost || "";
+document.getElementById("upiIdText").textContent = upiId;
+
+function setupQr() {
+  const amount = Number(cost || 0);
+  document.getElementById("amountText").textContent = "Rs " + amount.toLocaleString("en-IN");
+  const txnNote = "Hostel fee for " + (regNo || "student");
+  const upiPayload =
+    "upi://pay?pa=" + encodeURIComponent(upiId) +
+    "&pn=" + encodeURIComponent(payeeName) +
+    "&am=" + encodeURIComponent(String(amount)) +
+    "&cu=INR" +
+    "&tn=" + encodeURIComponent(txnNote);
+  const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=" + encodeURIComponent(upiPayload);
+  document.getElementById("qrImage").src = qrUrl;
+}
+
+if(!regNo || !cost){
+  document.getElementById("msg").innerText = "Booking/payment details missing. Please book/check fee again.";
+}
+setupQr();
+
+document.getElementById("qrPayForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const utr = this.utr.value.trim();
+  if(!regNo || !cost || !utr){
+    document.getElementById("msg").innerText = "Please enter UTR and ensure booking details are available.";
+    return;
+  }
+
+  try{
+    const response = await fetch(apiBase + "/api/payment", {
+      method: "POST",
+      headers: {"Content-Type":"application/x-www-form-urlencoded"},
+      body: new URLSearchParams({
+        reg_no: regNo,
+        amount: cost,
+        method: "UPI",
+        reference_no: utr
+      }).toString()
+    });
+    const data = await response.json();
+    document.getElementById("msg").innerText = data.message || "Payment updated.";
+    if(response.ok && data.success){
+      localStorage.setItem("paymentStatus", "PAID");
+      setTimeout(() => { window.location.href = "dashboard.html"; }, 900);
+    }
+  }catch(err){
+    document.getElementById("msg").innerText = "Unable to connect to server.";
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Warden Dashboard</title>
+  <link rel="stylesheet" href="app.css">
+  <style>
+    body { background: #0f172a; color: #e2e8f0; }
+    .card-dark { background: #1e293b; border-radius: 12px; padding: 18px; margin-top: 14px; }
+    .chip { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #334155; margin-right: 6px; margin-bottom: 6px; }
+    .leave { border: 1px solid #334155; border-radius: 10px; padding: 10px; margin-top: 10px; }
+    .row { display: flex; gap: 8px; margin-top: 8px; }
+    .ok { color: #86efac; }
+    .err { color: #fca5a5; }
+    .warn { color: #facc15; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Warden Dashboard</h1>
+    <div class="card-dark">
+      <h2 id="name"></h2>
+      <div class="chip" id="wardenNo"></div>
+      <div class="chip" id="floor"></div>
+      <div class="chip" id="group"></div>
+      <div class="chip" id="roomType"></div>
+      <button class="button" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="card-dark">
+      <h2>Pending Leave Applications</h2>
+      <p class="muted" id="hint">Loading...</p>
+      <p id="msg"></p>
+      <div id="leaveList"></div>
+    </div>
+  </div>
+
+<script>
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const wardenNo = localStorage.getItem("wardenNo") || "";
+let eventsStream = null;
+document.getElementById("name").textContent = localStorage.getItem("wardenName") || "Warden";
+document.getElementById("wardenNo").textContent = "No: " + (wardenNo || "-");
+document.getElementById("floor").textContent = "Floor: " + (localStorage.getItem("wardenFloor") || "-");
+document.getElementById("group").textContent = "Assigned Sharing: " + (localStorage.getItem("wardenGroup") || "-");
+document.getElementById("roomType").textContent = "Room Type: " + (localStorage.getItem("wardenRoomType") || "-");
+
+async function loadQueue(){
+  if(!wardenNo){
+    document.getElementById("hint").textContent = "Login again as warden.";
+    return;
+  }
+  try{
+    const response = await fetch(apiBase + "/api/warden-leave-queue?warden_no=" + encodeURIComponent(wardenNo));
+    const data = await response.json();
+    if(!response.ok || !data.success){
+      document.getElementById("hint").textContent = data.message || "Unable to load leave requests.";
+      return;
+    }
+
+    const requests = data.requests || [];
+    if(requests.length === 0){
+      document.getElementById("hint").textContent = "No pending leave requests.";
+      document.getElementById("leaveList").innerHTML = "";
+      return;
+    }
+
+    document.getElementById("hint").textContent = "Showing pending requests for floor " + data.floorNo;
+    document.getElementById("leaveList").innerHTML = requests.map(r => `
+      <div class="leave">
+        <div><strong>${r.name}</strong> (${r.regNo})</div>
+        <div>Contact: ${r.contact}</div>
+        <div>Leave: ${r.leaveDate} to ${r.returnDate}</div>
+        <div><strong>Attendance:</strong> ${r.attendancePercent == null ? "N/A" : (Number(r.attendancePercent).toFixed(2) + "%")}</div>
+        ${r.attendancePercent != null && Number(r.attendancePercent) < 75 ? "<div class='warn'>Attendance below 75%</div>" : ""}
+        <div>Reason: ${r.purpose || "No reason provided"}</div>
+        <div class="muted">Applied: ${r.createdAt}</div>
+        <div class="row">
+          <button class="button" onclick="takeAction(${r.id}, 'ACCEPT')">Accept</button>
+          <button class="button danger" onclick="takeAction(${r.id}, 'REJECT')">Reject</button>
+        </div>
+      </div>
+    `).join("");
+  }catch(err){
+    document.getElementById("hint").textContent = "Unable to connect to backend.";
+  }
+}
+
+async function takeAction(leaveId, action){
+  const msg = document.getElementById("msg");
+  msg.className = "";
+  msg.textContent = "Updating...";
+  try{
+    const response = await fetch(apiBase + "/api/warden-leave-action", {
+      method: "POST",
+      headers: {"Content-Type":"application/x-www-form-urlencoded"},
+      body: new URLSearchParams({warden_no:wardenNo, leave_id:String(leaveId), action:action}).toString()
+    });
+    const data = await response.json();
+    if(!response.ok || !data.success){
+      msg.className = "err";
+      msg.textContent = data.message || "Update failed";
+      return;
+    }
+    msg.className = "ok";
+    msg.textContent = data.message;
+    loadQueue();
+  }catch(err){
+    msg.className = "err";
+    msg.textContent = "Unable to connect to backend.";
+  }
+}
+
+function logout(){
+  if(eventsStream){
+    eventsStream.close();
+  }
+  localStorage.removeItem("wardenNo");
+  localStorage.removeItem("wardenName");
+  localStorage.removeItem("wardenFloor");
+  localStorage.removeItem("wardenGroup");
+  localStorage.removeItem("wardenRoomType");
+  window.location.href = "warden-login.html";
+}
+
+function connectRealtime(){
+  if(!wardenNo || typeof EventSource === "undefined"){
+    return;
+  }
+  const setup = () => {
+    eventsStream = new EventSource(apiBase + "/api/events");
+    eventsStream.addEventListener("LEAVE_UPDATED", () => {
+      loadQueue();
+    });
+    eventsStream.onerror = () => {
+      if(eventsStream) eventsStream.close();
+      setTimeout(setup, 2000);
+    };
+  };
+  setup();
+  window.addEventListener("beforeunload", () => {
+    if(eventsStream) eventsStream.close();
+  });
+}
+
+loadQueue();
+connectRealtime();
+setInterval(loadQueue, 15000);
+</script>
+</body>
+</html>

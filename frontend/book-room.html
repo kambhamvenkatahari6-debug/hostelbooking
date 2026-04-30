@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Room Booking</title>
+  <link rel="stylesheet" href="app.css">
+  <style>
+    .meta { color: #bfdbfe; font-size: 14px; margin-top: 6px; }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .chip { display: inline-block; margin: 0 6px 8px 0; padding: 6px 10px; border-radius: 999px; background: #e2e8f0; font-size: 12px; font-weight: 600; }
+    .fee { margin: 12px 0 0; font-size: 18px; font-weight: 700; }
+    select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 14px; }
+  </style>
+</head>
+<body class="page-main">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <h1>Room Booking</h1>
+      <div class="meta" id="studentMeta">Checking login...</div>
+    </div>
+    <div class="meta" id="monthMeta"></div>
+    <div class="status" id="status">Click Book to open room structure and pick an available room.</div>
+
+    <section class="cards-grid" id="cards"></section>
+
+    <div style="margin-top:18px;">
+      <button class="button secondary" onclick="window.location.href='check-fee.html'">Go To Fee Check</button>
+      <button class="button secondary" onclick="window.location.href='dashboard.html'">Back To Dashboard</button>
+    </div>
+  </div>
+
+<script>
+const roomPlans = [
+  { type:"AC", title:"AC Room", note:"Premium Cooling", minMembers:2, maxMembers:6, minFee:6000, maxFee:10000 },
+  { type:"NON_AC_STANDARD", title:"Non AC Room", note:"Standard Comfort", minMembers:4, maxMembers:8, minFee:4500, maxFee:7500 },
+  { type:"NON_AC_ECONOMY", title:"Non AC Economy", note:"Value Plan", minMembers:6, maxMembers:10, minFee:3000, maxFee:5500 }
+];
+
+const statusEl = document.getElementById("status");
+const studentMeta = document.getElementById("studentMeta");
+const monthMeta = document.getElementById("monthMeta");
+const cardsEl = document.getElementById("cards");
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const regNo = localStorage.getItem("regNo");
+const studentName = localStorage.getItem("studentName") || "Student";
+const bookingMonth = getNextMonthKey();
+let eventsStream = null;
+
+if(!regNo){
+  setStatus("err","Please login first to continue booking.");
+  studentMeta.textContent = "Not logged in";
+  setTimeout(() => window.location.href = "login.html", 900);
+} else {
+  studentMeta.textContent = studentName + " | Reg No: " + regNo;
+  monthMeta.textContent = "Booking Month: " + bookingMonth + " (Only next-month booking is allowed)";
+  renderCards();
+  loadVacancies();
+  checkExistingBooking();
+}
+
+window.addEventListener("message", (event) => {
+  const data = event.data || {};
+  if(data.type === "booking-success"){
+    localStorage.setItem("roomType", data.booking.roomType);
+    localStorage.setItem("floor", data.booking.floor);
+    localStorage.setItem("roomNo", data.booking.roomNo);
+    localStorage.setItem("cost", data.booking.fee);
+    localStorage.setItem("paymentStatus", data.booking.paymentStatus);
+    setStatus("ok", data.message || "Room booked successfully.");
+    loadVacancies();
+  }
+});
+
+function setStatus(type, message){
+  statusEl.className = "status" + (type ? " " + type : "");
+  statusEl.textContent = message;
+}
+
+function resolveFee(plan, members){
+  const ratio = (members - plan.minMembers) / (plan.maxMembers - plan.minMembers);
+  const fee = plan.maxFee - ((plan.maxFee - plan.minFee) * ratio);
+  return Math.round(fee / 100) * 100;
+}
+
+function renderCards(){
+  cardsEl.innerHTML = roomPlans.map((plan, idx) => {
+    const options = Array.from({length: plan.maxMembers - plan.minMembers + 1}, (_,i) => plan.minMembers + i)
+      .map(v => `<option value="${v}">${v} Members</option>`).join("");
+    const initialFee = resolveFee(plan, plan.minMembers);
+    return `
+      <article class="card">
+        <h2>${plan.title}</h2>
+        <p class="muted">${plan.note}</p>
+        <span class="chip">Sharing Range: ${plan.minMembers}-${plan.maxMembers}</span>
+        <span class="chip">Fee Range: Rs ${plan.minFee} - Rs ${plan.maxFee}</span>
+        <span class="chip" id="vacancy-${idx}">Vacancies: --</span>
+        <div style="margin-top:12px">
+          <label>Selected members</label>
+          <select id="members-${idx}" onchange="updateFee(${idx})">${options}</select>
+        </div>
+        <p class="fee" id="fee-${idx}">Estimated Fee: Rs ${initialFee}</p>
+        <button class="button" data-type="${plan.type}" data-index="${idx}" onclick="openRoomStructure(this)">Book</button>
+      </article>
+    `;
+  }).join("");
+}
+
+function updateFee(index){
+  const plan = roomPlans[index];
+  const members = Number(document.getElementById("members-" + index).value);
+  document.getElementById("fee-" + index).textContent = "Estimated Fee: Rs " + resolveFee(plan, members);
+}
+
+async function loadVacancies(){
+  try{
+    const response = await fetch(apiBase + "/api/room-vacancies?booking_month=" + encodeURIComponent(bookingMonth));
+    const data = await response.json();
+    if(!response.ok || !data.success) return;
+    roomPlans.forEach((plan, idx) => {
+      const found = data.vacancies.find(v => v.type === plan.type);
+      const el = document.getElementById("vacancy-" + idx);
+      if(el && found) el.textContent = "Vacancies: " + found.availableSlots + " / " + found.totalSlots;
+    });
+  }catch(err){}
+}
+
+async function checkExistingBooking(){
+  try{
+    const response = await fetch(apiBase + "/api/student-booking?reg_no=" + encodeURIComponent(regNo) + "&booking_month=" + encodeURIComponent(bookingMonth));
+    const data = await response.json();
+    if(response.ok && data.success){
+      setStatus("warn","You already have a booking for " + bookingMonth + ". You can still open options and change room.");
+      localStorage.setItem("roomType", data.booking.roomType);
+      localStorage.setItem("floor", data.booking.floor);
+      localStorage.setItem("roomNo", data.booking.roomNo);
+      localStorage.setItem("cost", data.booking.fee);
+      localStorage.setItem("paymentStatus", data.booking.paymentStatus);
+    }
+  }catch(err){}
+}
+
+function openRoomStructure(btn){
+  const idx = Number(btn.getAttribute("data-index"));
+  const type = btn.getAttribute("data-type");
+  const members = document.getElementById("members-" + idx).value;
+  const qs = new URLSearchParams({ room_type:type, members:members, booking_month:bookingMonth, reg_no:regNo }).toString();
+  const popup = window.open("room-structure.html?" + qs, "_blank", "width=1200,height=850");
+  if(!popup || popup.closed || typeof popup.closed === "undefined"){
+    setStatus("warn","Popup blocked by browser. Opening room structure in current tab.");
+    window.location.href = "room-structure.html?" + qs;
+  }
+}
+
+function getNextMonthKey(){
+  const now = new Date();
+  const year = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+  const month = now.getMonth() === 11 ? 1 : now.getMonth() + 2;
+  return year + "-" + String(month).padStart(2, "0");
+}
+
+function connectRealtime(){
+  if(!regNo || typeof EventSource === "undefined"){
+    return;
+  }
+  const setup = () => {
+    eventsStream = new EventSource(apiBase + "/api/events");
+    eventsStream.addEventListener("BOOKING_UPDATED", (event) => {
+      try{
+        const payload = JSON.parse(event.data || "{}");
+        if(payload.bookingMonth && payload.bookingMonth !== bookingMonth) return;
+      }catch(err){}
+      loadVacancies();
+      checkExistingBooking();
+    });
+    eventsStream.addEventListener("PAYMENT_UPDATED", (event) => {
+      try{
+        const payload = JSON.parse(event.data || "{}");
+        if(payload.regNo === regNo){
+          checkExistingBooking();
+        }
+      }catch(err){}
+    });
+    eventsStream.onerror = () => {
+      if(eventsStream) eventsStream.close();
+      setTimeout(setup, 2000);
+    };
+  };
+  setup();
+  window.addEventListener("beforeunload", () => {
+    if(eventsStream) eventsStream.close();
+  });
+}
+
+setInterval(() => {
+  if(!regNo) return;
+  loadVacancies();
+  checkExistingBooking();
+}, 15000);
+
+connectRealtime();
+</script>
+</body>
+</html>

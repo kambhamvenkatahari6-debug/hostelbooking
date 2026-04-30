@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Room Structure</title>
+  <link rel="stylesheet" href="app.css">
+  <style>
+    body { background: #f1f5f9; color: #0f172a; }
+    .top { background: #0f172a; color: #e2e8f0; padding: 12px 16px; }
+    .layout { display: grid; grid-template-columns: 1fr 330px; gap: 12px; padding: 12px; }
+    .board, .side { background: #ffffff; border-radius: 10px; padding: 12px; box-shadow: 0 6px 20px rgba(15,23,42,.1); }
+    .floor { margin-bottom: 10px; }
+    .floor-head { font-weight: 700; margin-bottom: 6px; }
+    .rooms { display: flex; flex-wrap: wrap; gap: 6px; }
+    .room { border: 1px solid #cbd5e1; border-radius: 7px; font-size: 12px; padding: 6px 8px; cursor: pointer; min-width: 70px; text-align: center; background: #ffffff; }
+    .room.available { border-color: #22c55e; background: #f0fdf4; }
+    .room.locked { border-color: #ef4444; background: #fef2f2; color: #7f1d1d; }
+    .room.selected { outline: 2px solid #0284c7; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <h2>Hostel Room Structure</h2>
+    <p id="meta"></p>
+  </div>
+
+  <div class="layout">
+    <div class="board">
+      <div id="status" class="status">Loading room structure...</div>
+      <div id="floors"></div>
+    </div>
+    <aside class="side">
+      <h3 style="margin-top:0">Room Details</h3>
+      <p class="muted" id="detailHint">Click an available room to view occupants.</p>
+      <div id="detailBox"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="button" id="confirmBtn" disabled onclick="confirmBooking()">Confirm This Room</button>
+        <button class="button secondary" onclick="window.close()">Close</button>
+      </div>
+    </aside>
+  </div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const roomType = params.get("room_type") || "";
+const members = params.get("members") || "";
+const bookingMonth = params.get("booking_month") || "";
+const regNo = params.get("reg_no") || "";
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+
+let selectedRoom = null;
+let eventsStream = null;
+
+document.getElementById("meta").textContent = roomType + " | " + members + " Members | Month: " + bookingMonth;
+
+loadStructure();
+connectRealtime();
+
+function setStatus(type, text){
+  const el = document.getElementById("status");
+  el.className = "status" + (type ? " " + type : "");
+  el.textContent = text;
+}
+
+async function loadStructure(){
+  try{
+    const q = new URLSearchParams({ room_type: roomType, members: members, booking_month: bookingMonth });
+    const response = await fetch(apiBase + "/api/room-structure?" + q.toString());
+    const data = await response.json();
+    if(!response.ok || !data.success){
+      setStatus("err", data.message || "Failed to load room structure");
+      return;
+    }
+
+    renderFloors(data.rooms);
+    setStatus("", "Select an available room. Locked rooms are full.");
+  }catch(err){
+    setStatus("err","Unable to connect to server.");
+  }
+}
+
+function renderFloors(rooms){
+  const byFloor = {};
+  rooms.forEach(r => {
+    byFloor[r.floor] = byFloor[r.floor] || [];
+    byFloor[r.floor].push(r);
+  });
+
+  const container = document.getElementById("floors");
+  container.innerHTML = "";
+  ["6","5","4","3","2","1"].forEach(floor => {
+    const list = byFloor[floor] || [];
+    const floorDiv = document.createElement("div");
+    floorDiv.className = "floor";
+    floorDiv.innerHTML = `<div class="floor-head">Floor ${floor}</div>`;
+    const roomsDiv = document.createElement("div");
+    roomsDiv.className = "rooms";
+
+    list.forEach(room => {
+      const btn = document.createElement("button");
+      btn.className = "room " + (room.locked ? "locked" : "available");
+      btn.textContent = room.roomNo + " (" + room.occupied + "/" + room.capacity + ")";
+      btn.onclick = () => selectRoom(room, btn);
+      roomsDiv.appendChild(btn);
+    });
+
+    floorDiv.appendChild(roomsDiv);
+    container.appendChild(floorDiv);
+  });
+}
+
+async function selectRoom(room, btn){
+  document.querySelectorAll(".room.selected").forEach(el => el.classList.remove("selected"));
+  btn.classList.add("selected");
+  selectedRoom = room;
+
+  try{
+    const q = new URLSearchParams({
+      room_type: roomType,
+      members: members,
+      booking_month: bookingMonth,
+      room_no: room.roomNo
+    });
+    const response = await fetch(apiBase + "/api/room-details?" + q.toString());
+    const data = await response.json();
+    if(!response.ok || !data.success){
+      document.getElementById("detailBox").innerHTML = `<p class="status err">${data.message || "Unable to fetch room details"}</p>`;
+      document.getElementById("confirmBtn").disabled = true;
+      return;
+    }
+
+    const occ = data.occupants || [];
+    const list = occ.length
+      ? "<ul>" + occ.map(o => `<li>${o.name} (${o.regNo})</li>`).join("") + "</ul>"
+      : "<p class='muted'>No occupants yet.</p>";
+
+    document.getElementById("detailBox").innerHTML = `
+      <p><strong>Room:</strong> ${data.room.roomNo}</p>
+      <p><strong>Floor:</strong> ${data.room.floor}</p>
+      <p><strong>Status:</strong> ${data.room.locked ? "Locked (Full)" : "Available"}</p>
+      <p><strong>Occupancy:</strong> ${data.room.occupied}/${data.room.capacity}</p>
+      <p><strong>Persons in room:</strong></p>
+      ${list}
+    `;
+
+    document.getElementById("confirmBtn").disabled = data.room.locked;
+    setStatus(data.room.locked ? "warn" : "ok", data.room.locked ? "This room is full." : "Room is available. You can confirm booking.");
+  }catch(err){
+    document.getElementById("detailBox").innerHTML = "<p class='status err'>Unable to fetch room details.</p>";
+    document.getElementById("confirmBtn").disabled = true;
+  }
+}
+
+async function confirmBooking(){
+  if(!selectedRoom){
+    setStatus("warn","Please select a room first.");
+    return;
+  }
+
+  const body = new URLSearchParams({
+    reg_no: regNo,
+    room_type: roomType,
+    members: members,
+    booking_month: bookingMonth,
+    preferred_room_no: selectedRoom.roomNo
+  }).toString();
+
+  try{
+    const response = await fetch(apiBase + "/api/book-room", {
+      method: "POST",
+      headers: {"Content-Type":"application/x-www-form-urlencoded"},
+      body
+    });
+    const data = await response.json();
+    if(!response.ok || !data.success){
+      setStatus("err", data.message || "Booking failed.");
+      return;
+    }
+
+    setStatus("ok", data.message || "Booked successfully.");
+    if(window.opener){
+      window.opener.postMessage({
+        type: "booking-success",
+        message: data.message,
+        booking: data.booking
+      }, "*");
+    }
+    setTimeout(() => window.close(), 700);
+  }catch(err){
+    setStatus("err","Unable to connect to server.");
+  }
+}
+
+function connectRealtime(){
+  if(typeof EventSource === "undefined"){
+    return;
+  }
+  const setup = () => {
+    eventsStream = new EventSource(apiBase + "/api/events");
+    eventsStream.addEventListener("BOOKING_UPDATED", (event) => {
+      try{
+        const payload = JSON.parse(event.data || "{}");
+        if(payload.bookingMonth && payload.bookingMonth !== bookingMonth){
+          return;
+        }
+      }catch(err){}
+      selectedRoom = null;
+      document.getElementById("confirmBtn").disabled = true;
+      document.getElementById("detailHint").textContent = "Room map updated in real time. Select a room again to view latest occupants.";
+      document.getElementById("detailBox").innerHTML = "";
+      loadStructure();
+    });
+    eventsStream.onerror = () => {
+      if(eventsStream) eventsStream.close();
+      setTimeout(setup, 2000);
+    };
+  };
+  setup();
+  window.addEventListener("beforeunload", () => {
+    if(eventsStream) eventsStream.close();
+  });
+}
+</script>
+</body>
+</html>

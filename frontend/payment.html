@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Details</title>
+  <link rel="stylesheet" href="app.css">
+  <style>
+    body { background: #394c7a; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .box { background: #ffffff; padding: 30px; border-radius: 12px; text-align: center; width: 350px; }
+  </style>
+</head>
+<body>
+<div class="box">
+  <h2>Hostel Payment</h2>
+  <p id="type"></p>
+  <p id="floor"></p>
+  <p id="room"></p>
+  <p id="cost"></p>
+  <p id="msg" class="muted"></p>
+  <button class="button" id="payNowBtn" onclick="goToQrPayment()">Pay Now</button>
+</div>
+
+<script>
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const regNo = localStorage.getItem("regNo");
+const payNowBtn = document.getElementById("payNowBtn");
+let eventsStream = null;
+if(!regNo){
+  window.location.href = "login.html";
+}
+
+async function loadBooking(){
+  try{
+    const response = await fetch(apiBase + "/api/student-booking?reg_no=" + encodeURIComponent(regNo));
+    const data = await response.json();
+    if(!response.ok || !data.success){
+      document.getElementById("msg").innerText = data.message || "Booking not found.";
+      return;
+    }
+
+    const booking = data.booking;
+    document.getElementById("type").innerText = "Room Type: " + booking.roomType;
+    document.getElementById("floor").innerText = "Floor: " + booking.floor;
+    document.getElementById("room").innerText = "Room No: " + booking.roomNo;
+    document.getElementById("cost").innerText = "Amount: Rs " + booking.fee;
+    if(booking.paymentStatus === "PAID"){
+      localStorage.removeItem("cost");
+      document.getElementById("msg").innerText = "Payment already completed for this booking.";
+      payNowBtn.style.display = "none";
+      return;
+    }
+    localStorage.setItem("cost", booking.fee);
+    document.getElementById("msg").innerText = "Pending payment found. Complete payment to confirm.";
+    payNowBtn.style.display = "inline-block";
+  }catch(err){
+    document.getElementById("msg").innerText = "Unable to connect to server.";
+  }
+}
+
+function goToQrPayment(){
+  const amount = localStorage.getItem("cost");
+  if(!amount || Number(amount) <= 0){
+    document.getElementById("msg").innerText = "No pending payment found.";
+    return;
+  }
+  window.location.href = "qr-payment.html";
+}
+
+function connectRealtime(){
+  if(!regNo || typeof EventSource === "undefined"){
+    return;
+  }
+  const setup = () => {
+    eventsStream = new EventSource(apiBase + "/api/events");
+    const refreshIfMine = (event) => {
+      try{
+        const payload = JSON.parse(event.data || "{}");
+        if(payload.regNo && payload.regNo !== regNo){
+          return;
+        }
+      }catch(err){}
+      loadBooking();
+    };
+    eventsStream.addEventListener("BOOKING_UPDATED", refreshIfMine);
+    eventsStream.addEventListener("PAYMENT_UPDATED", refreshIfMine);
+    eventsStream.onerror = () => {
+      if(eventsStream) eventsStream.close();
+      setTimeout(setup, 2000);
+    };
+  };
+  setup();
+  window.addEventListener("beforeunload", () => {
+    if(eventsStream) eventsStream.close();
+  });
+}
+
+loadBooking();
+connectRealtime();
+setInterval(loadBooking, 15000);
+</script>
+</body>
+</html>

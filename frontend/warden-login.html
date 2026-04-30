@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Warden Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="page-auth">
+  <div class="card-auth">
+    <section class="auth-panel auth-panel--brand">
+      <div class="auth-brand">
+        <div class="auth-badge">Vignan Institutions</div>
+        <h1 class="auth-title">Hostel <span>Management System</span></h1>
+        <p class="auth-copy">Authorized warden access for approvals, hostel monitoring, and floor management.</p>
+      </div>
+    </section>
+
+    <section class="auth-panel auth-panel--form">
+      <div class="auth-form-shell">
+        <div class="auth-tabs">
+          <a class="auth-tab" href="login.html">Student</a>
+          <a class="auth-tab active" href="warden-login.html">Warden</a>
+          <a class="auth-tab" href="create-account.html">Register</a>
+        </div>
+
+        <h2 class="auth-heading">Warden Login</h2>
+        <p class="auth-subheading">Enter your warden ID and password.</p>
+
+        <form id="wardenForm">
+          <label class="field-label" for="wardenNo">Warden ID</label>
+          <div class="input-wrap">
+            <span class="input-icon">W</span>
+            <input id="wardenNo" type="text" name="warden_no" placeholder="WAR1001" required>
+          </div>
+
+          <label class="field-label" for="wardenPassword">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">#</span>
+            <input id="wardenPassword" type="password" name="password" placeholder="Enter password" required>
+          </div>
+
+          <button class="button" type="submit">Sign In</button>
+        </form>
+
+        <p id="msg" class="helper-text"></p>
+      </div>
+    </section>
+  </div>
+
+<script>
+const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const form = document.getElementById("wardenForm");
+const msg = document.getElementById("msg");
+
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const formData = new URLSearchParams(new FormData(this));
+
+  try {
+    const response = await fetch(apiBase + "/api/warden-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString()
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      msg.textContent = data.message || "Login failed";
+      return;
+    }
+
+    localStorage.setItem("wardenNo", data.warden.wardenNo);
+    localStorage.setItem("wardenName", data.warden.name);
+    localStorage.setItem("wardenFloor", data.warden.floorNo);
+    localStorage.setItem("wardenGroup", data.warden.memberGroup);
+    localStorage.setItem("wardenRoomType", data.warden.roomType);
+    window.location.href = "warden-dashboard.html";
+  } catch (err) {
+    msg.textContent = "Unable to connect to server.";
+  }
+});
+</script>
+</body>
+</html>

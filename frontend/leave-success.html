@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Submitted</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+  <style>
+    :root {
+      --ok-bg: #f5f2ed;
+      --ok-card: #ffffff;
+      --ok-border: #e7ded5;
+      --ok-ink: #1a1410;
+      --ok-muted: #766c64;
+      --ok-accent: #c8692a;
+      --ok-accent-dark: #a0501e;
+      --ok-shadow: 0 20px 46px rgba(18, 12, 8, 0.12);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: radial-gradient(circle at top right, rgba(200, 105, 42, 0.13), transparent 36%), var(--ok-bg);
+      font-family: "DM Sans", sans-serif;
+      color: var(--ok-ink);
+    }
+
+    .success-card {
+      width: min(560px, 100%);
+      background: var(--ok-card);
+      border: 1px solid var(--ok-border);
+      border-radius: 20px;
+      padding: 34px 30px;
+      box-shadow: var(--ok-shadow);
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      background: #e8f7ef;
+      display: grid;
+      place-items: center;
+      color: #1f8a4c;
+      font-size: 34px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Playfair Display", serif;
+      font-size: 34px;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 12px 0 0;
+      color: var(--ok-muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .actions {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .actions a {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      border-radius: 12px;
+      font-weight: 700;
+      padding: 0 14px;
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, var(--ok-accent), var(--ok-accent-dark));
+      color: #ffffff;
+      border: 1px solid rgba(160, 80, 30, 0.35);
+    }
+
+    .btn-sub {
+      background: #f7f3ee;
+      color: #3d332b;
+      border: 1px solid #daccc0;
+    }
+
+    @media (max-width: 560px) {
+      .success-card {
+        padding: 30px 22px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="success-card">
+    <div class="success-icon">OK</div>
+    <h1>Leave Submitted</h1>
+    <p>Your leave request has been submitted successfully.</p>
+    <p>You can track status updates from the leave request page and dashboard.</p>
+    <div class="actions">
+      <a class="btn-main" href="dashboard.html">Back to Dashboard</a>
+      <a class="btn-sub" href="leave-request.html">Submit Another</a>
+    </div>
+  </main>
+</body>
+</html>

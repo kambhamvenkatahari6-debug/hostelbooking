@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+  <style>
+    :root {
+      --dash-bg-top: #182237;
+      --dash-bg-bottom: #34425a;
+      --dash-card: #f8f7f5;
+      --dash-card-text: #061b46;
+      --dash-card-muted: #8ea0bc;
+      --dash-shadow: 0 18px 34px rgba(6, 23, 51, 0.22);
+    }
+
+    body.page-main {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "DM Sans", sans-serif;
+      background: linear-gradient(180deg, var(--dash-bg-top) 0%, #1d2740 38%, var(--dash-bg-bottom) 100%);
+      color: #ffffff;
+    }
+
+    .student-shell {
+      min-height: 100vh;
+    }
+
+    .student-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 72px;
+      display: grid;
+      grid-template-columns: 140px 1fr 140px;
+      align-items: center;
+      padding: 0 22px;
+      background: linear-gradient(90deg, #5b46ea 0%, #3089ef 48%, #1ebed0 100%);
+      box-shadow: 0 10px 26px rgba(17, 24, 39, 0.28);
+    }
+
+    .student-menu-btn {
+      justify-self: start;
+      color: #ffffff;
+      font-size: 0.96rem;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+    }
+
+    .student-brand {
+      justify-self: center;
+      font-size: clamp(1.1rem, 2vw, 1.3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .student-avatar {
+      justify-self: end;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #2ac84d;
+      color: #ffffff;
+      font-size: 1.05rem;
+      font-weight: 800;
+      box-shadow: 0 10px 22px rgba(42, 200, 77, 0.35);
+    }
+
+    .student-sidebar {
+      position: fixed;
+      top: 0;
+      left: -290px;
+      width: 270px;
+      height: 100vh;
+      padding: 28px 22px;
+      background: #131c2f;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      transition: left 0.25s ease;
+      z-index: 30;
+      box-shadow: 20px 0 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .student-sidebar h3 {
+      margin: 0 0 18px;
+      font-size: 1.1rem;
+      font-weight: 800;
+    }
+
+    .student-sidebar a {
+      display: block;
+      margin-bottom: 12px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #dbe4f3;
+      text-decoration: none;
+      font-weight: 700;
+      transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .student-sidebar a:hover {
+      background: rgba(91, 70, 234, 0.22);
+      transform: translateX(2px);
+    }
+
+    .student-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      background: rgba(4, 10, 22, 0.52);
+      z-index: 25;
+    }
+
+    .student-content {
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 56px 34px 80px;
+    }
+
+    .student-content h1 {
+      margin: 0 0 30px;
+      font-size: clamp(2.4rem, 4vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .student-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 22px;
+      margin-bottom: 22px;
+    }
+
+    .student-card {
+      min-height: 136px;
+      padding: 28px 26px;
+      border: none;
+      border-radius: 18px;
+      background: var(--dash-card);
+      color: var(--dash-card-text);
+      box-shadow: var(--dash-shadow);
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .student-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 40px rgba(6, 23, 51, 0.26);
+    }
+
+    .student-card h2 {
+      margin: 0 0 18px;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .student-card p {
+      margin: 0;
+      color: var(--dash-card-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+
+    .student-status {
+      padding: 24px 22px 20px;
+      border-radius: 18px;
+      background: var(--dash-card);
+      color: var(--dash-card-text);
+      box-shadow: var(--dash-shadow);
+    }
+
+    .student-status-title {
+      margin: 0 0 8px;
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+
+    .student-status-text {
+      margin: 0 0 6px;
+      font-size: 0.98rem;
+    }
+
+    .student-status-time {
+      color: var(--dash-card-muted);
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    @media (max-width: 1100px) {
+      .student-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .student-topbar {
+        grid-template-columns: 90px 1fr 90px;
+        padding: 0 14px;
+      }
+
+      .student-content {
+        padding: 34px 18px 56px;
+      }
+
+      .student-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .student-avatar {
+        width: 44px;
+        height: 44px;
+      }
+
+      .student-brand {
+        text-align: center;
+        line-height: 1.2;
+      }
+    }
+  </style>
+</head>
+<body class="page-main">
+  <div class="student-shell">
+    <aside id="sidebar" class="student-sidebar">
+      <h3>Menu</h3>
+      <a href="book-room.html">Book Room</a>
+      <a href="leave-request.html">Leave Request</a>
+      <a href="check-fee.html">Payments</a>
+      <a href="mess-menu.html">Mess Menu</a>
+      <a href="rules.html">Rules</a>
+      <a href="login.html">Logout</a>
+    </aside>
+    <div id="overlay" class="student-overlay" onclick="closeSidebar()"></div>
+
+    <header class="student-topbar">
+      <div class="student-menu-btn" onclick="openSidebar()">Menu</div>
+      <div class="student-brand">Vignan Hostel Portal</div>
+      <div class="student-avatar" id="avatar">ST</div>
+    </header>
+
+    <main class="student-content">
+      <h1>Welcome</h1>
+
+      <section class="student-grid">
+        <button class="student-card" type="button" onclick="window.location.href='book-room.html'">
+          <h2>Book Room</h2>
+          <p>Reserve hostel room</p>
+        </button>
+        <button class="student-card" type="button" onclick="window.location.href='leave-request.html'">
+          <h2>Leave Request</h2>
+          <p>Submit leave application</p>
+        </button>
+        <button class="student-card" type="button" onclick="window.location.href='check-fee.html'">
+          <h2>Payments</h2>
+          <p>Check and pay hostel fee</p>
+        </button>
+        <button class="student-card" type="button" onclick="window.location.href='mess-menu.html'">
+          <h2>Mess Menu</h2>
+          <p>View weekly menu</p>
+        </button>
+      </section>
+
+      <section class="student-status">
+        <div class="student-status-title">Latest Leave Status</div>
+        <p class="student-status-text" id="leaveStatusText">Loading...</p>
+        <div class="student-status-time" id="leaveStatusTime"></div>
+      </section>
+    </main>
+  </div>
+
+<script>
+function openSidebar() {
+  document.getElementById("sidebar").style.left = "0";
+  document.getElementById("overlay").style.display = "block";
+}
+
+function closeSidebar() {
+  document.getElementById("sidebar").style.left = "-290px";
+  document.getElementById("overlay").style.display = "none";
+}
+
+function buildInitials(name) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+}
+
+async function loadLeaveStatus() {
+  const regNo = localStorage.getItem("regNo");
+  if (!regNo) {
+    document.getElementById("leaveStatusText").innerText = "No student session found.";
+    document.getElementById("leaveStatusTime").innerText = "";
+    return;
+  }
+
+  const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+
+  try {
+    const response = await fetch(apiBase + "/api/my-leaves?reg_no=" + encodeURIComponent(regNo));
+    const data = await response.json();
+
+    if (!response.ok || !data.success || !data.records || data.records.length === 0) {
+      document.getElementById("leaveStatusText").innerText = "No leave application yet.";
+      document.getElementById("leaveStatusTime").innerText = "Updated just now";
+      return;
+    }
+
+    const records = data.records;
+    const reviewed = records.find((record) => record.status === "GRANTED" || record.status === "REJECTED");
+    const pendingCount = records.filter((record) => record.status === "PENDING").length;
+
+    if (reviewed) {
+      const reviewedText = reviewed.status === "GRANTED" ? "Leave Granted" : "Leave Rejected";
+      const suffix = pendingCount > 0 ? " | Pending requests: " + pendingCount : "";
+      document.getElementById("leaveStatusText").innerText = reviewedText + " (" + reviewed.leaveDate + " to " + reviewed.returnDate + ")" + suffix;
+    } else {
+      const latestPending = records[0];
+      document.getElementById("leaveStatusText").innerText = "Leave Pending Approval (" + latestPending.leaveDate + " to " + latestPending.returnDate + ")";
+    }
+
+    document.getElementById("leaveStatusTime").innerText = "Updated at " + new Date().toLocaleTimeString();
+  } catch (err) {
+    document.getElementById("leaveStatusText").innerText = "Unable to fetch leave status.";
+    document.getElementById("leaveStatusTime").innerText = "";
+  }
+}
+
+const name = localStorage.getItem("studentName") || "Student";
+document.getElementById("avatar").innerText = buildInitials(name) || "ST";
+loadLeaveStatus();
+setInterval(loadLeaveStatus, 8000);
+</script>
+</body>
+</html>
+
