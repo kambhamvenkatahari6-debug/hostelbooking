@@ -1,9 +1,7 @@
 services:
   - type: web
     name: hostelbooking
-    env: java
+    runtime: docker
     plan: free
-    buildCommand: mkdir -p backend/out && javac -d backend/out backend/src/Main.java
-    startCommand: java -cp backend/out Main
     healthCheckPath: /login.html
     autoDeploy: true
