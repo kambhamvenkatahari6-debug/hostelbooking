@@ -435,7 +435,7 @@
   </div>
 
   <script>
-    const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+    const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
     const leaveForm = document.getElementById("leaveForm");
     const regInput = document.getElementById("regNo");
     const nameInput = document.getElementById("studentName");
@@ -615,4 +615,5 @@
   </script>
 </body>
 </html>
+
 

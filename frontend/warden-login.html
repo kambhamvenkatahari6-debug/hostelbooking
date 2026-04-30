@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Warden Login</title>
@@ -52,7 +52,7 @@
   </div>
 
 <script>
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 const form = document.getElementById("wardenForm");
 const msg = document.getElementById("msg");
 
@@ -86,3 +86,4 @@ form.addEventListener("submit", async function(e) {
 </script>
 </body>
 </html>
+

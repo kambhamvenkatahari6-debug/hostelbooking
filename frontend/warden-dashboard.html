@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Warden Dashboard</title>
@@ -35,7 +35,7 @@
   </div>
 
 <script>
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 const wardenNo = localStorage.getItem("wardenNo") || "";
 let eventsStream = null;
 document.getElementById("name").textContent = localStorage.getItem("wardenName") || "Warden";
@@ -148,3 +148,4 @@ setInterval(loadQueue, 15000);
 </script>
 </body>
 </html>
+

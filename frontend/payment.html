@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Payment Details</title>
@@ -20,7 +20,7 @@
 </div>
 
 <script>
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 const regNo = localStorage.getItem("regNo");
 const payNowBtn = document.getElementById("payNowBtn");
 let eventsStream = null;
@@ -99,3 +99,4 @@ setInterval(loadBooking, 15000);
 </script>
 </body>
 </html>
+

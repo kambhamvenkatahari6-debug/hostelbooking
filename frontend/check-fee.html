@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Check Fee Due</title>
@@ -20,7 +20,7 @@
 </div>
 
 <script>
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 let eventsStream = null;
 document.getElementById("reg").value = localStorage.getItem("regNo") || "";
 
@@ -106,3 +106,4 @@ setInterval(() => {
 </script>
 </body>
 </html>
+

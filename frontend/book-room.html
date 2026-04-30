@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Room Booking</title>
@@ -39,7 +39,7 @@ const statusEl = document.getElementById("status");
 const studentMeta = document.getElementById("studentMeta");
 const monthMeta = document.getElementById("monthMeta");
 const cardsEl = document.getElementById("cards");
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 const regNo = localStorage.getItem("regNo");
 const studentName = localStorage.getItem("studentName") || "Student";
 const bookingMonth = getNextMonthKey();
@@ -200,3 +200,4 @@ connectRealtime();
 </script>
 </body>
 </html>
+

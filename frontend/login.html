@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Student Login</title>
@@ -91,7 +91,7 @@
   </div>
 
 <script>
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 const loginView = document.getElementById("loginView");
 const forgotView = document.getElementById("forgotView");
 const msg = document.getElementById("msg");
@@ -165,3 +165,4 @@ document.getElementById("forgotForm").addEventListener("submit", async function 
 </script>
 </body>
 </html>
+

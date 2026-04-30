@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>QR Payment</title>
@@ -38,7 +38,7 @@
 </div>
 
 <script>
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 const regNo = localStorage.getItem("regNo");
 const cost = localStorage.getItem("cost");
 const upiId = "vignanhostel@upi";
@@ -101,3 +101,4 @@ document.getElementById("qrPayForm").addEventListener("submit", async function(e
 </script>
 </body>
 </html>
+

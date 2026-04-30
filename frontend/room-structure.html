@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <title>Room Structure</title>
@@ -45,7 +45,7 @@ const roomType = params.get("room_type") || "";
 const members = params.get("members") || "";
 const bookingMonth = params.get("booking_month") || "";
 const regNo = params.get("reg_no") || "";
-const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
 
 let selectedRoom = null;
 let eventsStream = null;
@@ -222,3 +222,4 @@ function connectRealtime(){
 </script>
 </body>
 </html>
+

@@ -587,7 +587,7 @@
   </div>
 
   <script>
-    const apiBase = (window.location.protocol === "file:" || window.location.origin !== "http://localhost:8080") ? "http://localhost:8080" : "";
+    const apiBase = window.location.protocol === "file:" ? (localStorage.getItem("apiBase") || "http://localhost:8080") : "";
     const regNo = localStorage.getItem("regNo");
     const studentName = localStorage.getItem("studentName") || "Student";
     const today = new Date();
@@ -771,4 +771,5 @@
   </script>
 </body>
 </html>
+
 
